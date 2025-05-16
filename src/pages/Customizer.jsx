@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSnapshot } from 'valtio';
 
@@ -46,6 +46,30 @@ const Customizer = () => {
         return null;
     }
   }
+
+
+
+
+const editorRef = useRef(); 
+
+useEffect(() => {
+  const handleClickOutside = (event) => {
+
+    if (snap.intro || !editorRef.current) return;
+
+
+    if (!editorRef.current.contains(event.target)) {
+      setActiveEditorTab(""); 
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside);
+
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, [snap.intro]);
+
 
 
 
@@ -134,17 +158,17 @@ const handleSubmit = async (type) => {
             {...slideAnimation('left')}
           >
             <div className="flex items-center min-h-screen">
-              <div className="editortabs-container tabs">
-                {EditorTabs.map((tab) => (
-                  <Tab 
-                    key={tab.name}
-                    tab={tab}
-                    handleClick={() => setActiveEditorTab(tab.name)}
-                  />
-                ))}
+             <div className="editortabs-container tabs" ref={editorRef}>
+  {EditorTabs.map((tab) => (
+    <Tab 
+      key={tab.name}
+      tab={tab}
+      handleClick={() => setActiveEditorTab(tab.name)}
+    />
+  ))}
 
-                {generateTabContent()}
-              </div>
+  {generateTabContent()} 
+</div>
             </div>
           </motion.div>
 
@@ -161,7 +185,7 @@ const handleSubmit = async (type) => {
           </motion.div>
 
           <motion.div
-            className='filtertabs-container'
+            className='filtertabs-container'  
             {...slideAnimation("up")}
           >
             {FilterTabs.map((tab) => (
